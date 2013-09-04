@@ -1,0 +1,14 @@
+{
+    "name": "cbednarski/pharcc",
+    "description": "Phar compiler",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Bednarski",
+            "email": "banzaimonkey@gmail.com"
+        }
+    ],
+    "require": {
+
+    }
+}
