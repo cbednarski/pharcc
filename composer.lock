@@ -3,41 +3,8 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "9f1ed80baec4293c9012359a4002bf9f",
+    "hash": "1b46dcf07e80295a7b15f4740e84b099",
     "packages": [
-        {
-            "name": "cbednarski/fileutils",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cbednarski/FileUtils.git",
-                "reference": "60df8c6369587c6091df7bd62df3ed212b828d2c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cbednarski/FileUtils/zipball/60df8c6369587c6091df7bd62df3ed212b828d2c",
-                "reference": "60df8c6369587c6091df7bd62df3ed212b828d2c",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "cbednarski": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Chris Bednarski",
-                    "email": "banzaimonkey@gmail.com"
-                }
-            ],
-            "description": "PHP Library for doing path-based filename manipulation and other similar fun activities",
-            "time": "2013-09-04 02:20:47"
-        },
         {
             "name": "symfony/finder",
             "version": "v2.3.4",
@@ -140,9 +107,9 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "cbednarski/fileutils": 20
-    },
+    "stability-flags": [
+
+    ],
     "platform": [
 
     ],

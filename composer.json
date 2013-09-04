@@ -9,7 +9,6 @@
         }
     ],
     "require": {
-        "cbednarski/fileutils":"dev-master",
         "symfony/finder":"2.3.*",
         "symfony/process":"2.3.*"
     },

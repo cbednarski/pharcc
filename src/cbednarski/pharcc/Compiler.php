@@ -6,7 +6,6 @@ use Phar;
 use PharException;
 use RuntimeException;
 use Symfony\Component\Finder\Finder;
-use cbednarski\FileUtils\FileUtils;
 
 /**
  * The Compiler class compiles your library into a phar
