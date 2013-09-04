@@ -1,6 +1,6 @@
 {
     "name": "cbednarski/pharcc",
-    "description": "Phar compiler",
+    "description": "Phar compiler library",
     "license": "MIT",
     "authors": [
         {
@@ -9,6 +9,11 @@
         }
     ],
     "require": {
-
+        "cbednarski/fileutils":"dev-master",
+        "symfony/finder":"2.3.*",
+        "symfony/process":"2.3.*"
+    },
+    "autoload": {
+        "psr-0": {"cbednarski": "src/"}
     }
 }

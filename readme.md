@@ -9,7 +9,9 @@ A phar compiler library for PHP, based on the phar compiler code in [composer](h
 
 ## Usage
 
+```php
 $compiler = new Pharcc();
 $compiler->setTarget('myphar.php');
 $compiler->addDirectory('src/');
 $compiler->compile();
+```
