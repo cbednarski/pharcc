@@ -2,8 +2,11 @@
 
 namespace cbednarski\pharcc;
 
+use Phar;
+use PharException;
+use RuntimeException;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
+use cbednarski\FileUtils\FileUtils;
 
 /**
  * The Compiler class compiles your library into a phar
@@ -17,14 +20,16 @@ use Symfony\Component\Process\Process;
  */
 class Compiler
 {
+    protected $phar = null;
+    protected $base_dir = null;
     protected $finders = array();
     protected $version = null;
     protected $license = null;
 
     /** The target name for your phar app */
-    protected $target = 'pharcc-target';
+    protected $target = null;
     /** The main executable for your app, if you have one */
-    protected $main = null;
+    protected $main = 'vendor/autoload.php';
 
     protected $default_includes = array(
         'src',
@@ -39,18 +44,11 @@ class Compiler
         'Tests',
         'phpunit',
         'doc',
-    )
+        'docs',
+        'pharcc',
+    );
 
-    protected $stub = <<<"HEREDOC"
-#!/usr/bin/env php
-<?php
-
-Phar::mapPhar('$target');
-
-require 'phar://$target/$main';
-
-__HALT_COMPILER();
-HEREDOC;
+    protected $stub = null;
 
     /**
      * Returns a boolean indicating whether or not you're allowed to compile a
@@ -62,12 +60,42 @@ HEREDOC;
      */
     public static function canCompile()
     {
-        return Phar::canWrite();
+        if (!Phar::canWrite()) {
+            throw new PharException(
+                'Unable to compile a phar because of php\'s security settings. '
+                . 'phar.readonly must be disabled in php.ini. Details here: '
+                . 'http://php.net/manual/en/phar.configuration.php');
+        }
     }
 
-    public function __construct()
+    public function __construct($base_dir, $target = 'target.phar')
     {
+        self::canCompile();
 
+        $this->base_dir = realpath($base_dir);
+        if (!$this->base_dir) {
+            throw new RuntimeException('The compiler target directory does not exist');
+        }
+
+        $this->target = $target;
+        $this->addFinder(self::initializeFinder($this->base_dir));
+
+        $this->phar = new Phar($this->getTargetPath(), 0, $target);
+    }
+
+    public static function initializeFinder($base_dir = null)
+    {
+        $finder = new Finder();
+        $finder->files()
+            ->ignoreDotFiles(true)
+            ->ignoreVCS(true)
+            ->ignoreUnreadableDirs(true);
+
+        if ($base_dir !== null) {
+            $finder->in($base_dir);
+        }
+
+        return $finder;
     }
 
     public function setMain($main)
@@ -82,16 +110,14 @@ HEREDOC;
         return $this->main;
     }
 
-    public function setTarget($target)
-    {
-        $this->target = $target;
-
-        return $this;
-    }
-
     public function getTarget()
     {
         return $this->target();
+    }
+
+    public function getTargetPath()
+    {
+        return $this->base_dir . DIRECTORY_SEPARATOR . $this->target;
     }
 
     /** @link http://php.net/manual/en/phar.fileformat.stub.php */
@@ -104,7 +130,24 @@ HEREDOC;
 
     private function getStub()
     {
-        return $this->stub;
+        if ($this->stub === null) {
+            $stub = <<<"HEREDOC"
+#!/usr/bin/env php
+<?php
+
+Phar::mapPhar('%target%');
+
+require 'phar://%target%/%main%';
+
+__HALT_COMPILER();\n
+HEREDOC;
+            $stub = str_replace('%target%', $this->target, $stub);
+            $stub = str_replace('%main%', $this->main, $stub);
+        } else {
+            $stub = $this->stub;
+        }
+
+        return $stub;
     }
 
     public function addFinder(Finder $finder)
@@ -121,84 +164,53 @@ HEREDOC;
 
     public function compile()
     {
-        if(!self::canCompile()) {
-            throw new \RuntimeException(
-                'Unable to compile a phar because of php\'s security settings.'
-                . 'phar.readonly must be disabled. Details here:'
-                . 'http://php.net/manual/en/phar.configuration.php');
-        }
-
-        if (file_exists($pharFile)) {
-            unlink($pharFile);
+        if (file_exists($this->getTargetPath())) {
+            unlink($this->getTargetPath());
         }
 
         //@TODO add version stuff here
 
-        $phar = new \Phar($pharFile, 0, $this->target);
-        $phar->setSignatureAlgorithm(\Phar::SHA1);
+        $this->phar->setSignatureAlgorithm(Phar::SHA1);
 
-        $phar->startBuffering();
+        /** Optional, but improves performance for this type of operation.
+         *  For an example library, the compile time goes from 154s to 40s
+         *  when buffering is used.
+         *  @link http://php.net/manual/en/phar.startbuffering.php */
+        $this->phar->startBuffering();
 
-        //@TODO remove composer-specific stuff
-        //@TODO generalize
-
-        $finder = new Finder();
-        $finder->files()
-            ->ignoreVCS(true)
-            ->name('*.php')
-            ->notName('Compiler.php')
-            ->notName('ClassLoader.php')
-            ->in(__DIR__.'/..')
-        ;
-
-        foreach ($finder as $file) {
-            $this->addFile($phar, $file);
+        foreach($this->default_excludes as $exclude) {
+            $this->exclude("/$exclude/");
         }
 
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/autoload.php'));
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/autoload_namespaces.php'));
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/autoload_classmap.php'));
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/autoload_real.php'));
-        if (file_exists(__DIR__.'/../../vendor/composer/include_paths.php')) {
-            $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/include_paths.php'));
+        foreach ($this->getFinders() as $finder) {
+            foreach($finder as $file) {
+                $this->addFile($file);
+            }
         }
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/ClassLoader.php'));
-        $this->addComposerBin($phar);
 
-        // Stubs
-        $phar->setStub($this->getStub());
+        $this->phar->setStub($this->getStub());
+        $this->phar->stopBuffering();
 
-        $phar->stopBuffering();
-
-        // disabled for interoperability with systems without gzip ext
-        // $phar->compressFiles(\Phar::GZ);
-
-        $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../LICENSE'), false);
-
-        unset($phar);
+        unset($this->phar);
     }
 
-    private function addFile($phar, $file, $strip = true)
+    public function addFile($file)
     {
-        $path = str_replace(dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR, '', $file->getRealPath());
-
-        $content = file_get_contents($file);
-        if ($strip) {
-            $content = self::stripWhitespace($content);
-        } elseif ('LICENSE' === basename($file)) {
-            $content = "\n".$content."\n";
-        }
-
+        $content = file_get_contents($file->getPathName());
+        $content = self::stripWhitespace($content);
         $content = str_replace('@package_version@', $this->version, $content);
 
-        $phar->addFromString($path, $content);
+        $this->phar->addFromString($file->getRelativePathname(), $content);
     }
 
-    public function addBin($phar)
+    public function addDirectory($path)
     {
-        $content = file_get_contents(__DIR__.'/../../bin/composer');
-        $content = preg_replace('{^#!/usr/bin/env php\s*}', '', $content);
-        $phar->addFromString('bin/composer', $content);
+        $this->finders[0]->in($path);
+    }
+
+    public function exclude($pattern)
+    {
+        $this->finders[0]->notPath($pattern);
     }
 
     /**
