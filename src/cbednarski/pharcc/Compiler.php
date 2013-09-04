@@ -5,16 +5,42 @@ namespace cbednarski\pharcc;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 
+/**
+ * The Compiler class compiles your library into a phar
+ *
+ * @author Chris Bednarski <banzaimonkey@gmail.com>
+ * @author Fabien Potencier <fabien@symfony.com>
+ * @author Jordi Boggiano <j.boggiano@seld.be>
+ */
 class Compiler
 {
     protected $finders;
-    protected $stub = <<<HEREDOC
+    protected $version;
+
+    protected $target = 'pharcc-target.phar';
+    protected $main = ''
+
+    protected $default_includes = array(
+        'src',
+        'lib',
+        'vendor',
+    );
+
+    protected $default_excludes = array(
+        'test',
+        'Test',
+        'tests',
+        'Tests',
+        'phpunit',
+    )
+
+    protected $stub = <<<"HEREDOC"
 #!/usr/bin/env php
 <?php
 
-Phar::mapPhar('composer.phar');
+Phar::mapPhar('$target');
 
-require 'phar://composer.phar/bin/composer';
+require 'phar://$target/$main';
 
 __HALT_COMPILER();
 HEREDOC;
@@ -24,12 +50,15 @@ HEREDOC;
 
     }
 
-    /**
-     * The stub is the used to bake the phar
-     */
+    /** @link http://php.net/manual/en/phar.fileformat.stub.php */
     public function setStub($stub)
     {
         $this->stub = $stub;
+    }
+
+    private function getStub()
+    {
+        return $this->stub;
     }
 
     public function addFinder(Finder $finder)
@@ -54,63 +83,16 @@ HEREDOC;
         if (file_exists($pharFile)) {
             unlink($pharFile);
         }
-    }
-}
 
-<?php
+        //@TODO add version stuff here
 
-/*
- * This file is part of Composer.
- *
- * (c) Nils Adermann <naderman@naderman.de>
- *     Jordi Boggiano <j.boggiano@seld.be>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-namespace Composer;
-
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
-
-/**
- * The Compiler class compiles composer into a phar
- *
- * @author Fabien Potencier <fabien@symfony.com>
- * @author Jordi Boggiano <j.boggiano@seld.be>
- */
-class Compiler
-{
-    private $version;
-
-    /**
-     * Compiles composer into a single phar file
-     *
-     * @throws \RuntimeException
-     * @param  string            $pharFile The full path to the file to create
-     */
-    public function compile($pharFile = 'composer.phar')
-    {
-        if (file_exists($pharFile)) {
-            unlink($pharFile);
-        }
-
-        $process = new Process('git log --pretty="%H" -n1 HEAD', __DIR__);
-        if ($process->run() != 0) {
-            throw new \RuntimeException('Can\'t run git log. You must ensure to run compile from composer git repository clone and that git binary is available.');
-        }
-        $this->version = trim($process->getOutput());
-
-        $process = new Process('git describe --tags HEAD');
-        if ($process->run() == 0) {
-            $this->version = trim($process->getOutput());
-        }
-
-        $phar = new \Phar($pharFile, 0, 'composer.phar');
+        $phar = new \Phar($pharFile, 0, $this->target);
         $phar->setSignatureAlgorithm(\Phar::SHA1);
 
         $phar->startBuffering();
+
+        //@TODO remove composer-specific stuff
+        //@TODO generalize
 
         $finder = new Finder();
         $finder->files()
@@ -124,6 +106,7 @@ class Compiler
         foreach ($finder as $file) {
             $this->addFile($phar, $file);
         }
+
         $this->addFile($phar, new \SplFileInfo(__DIR__ . '/Autoload/ClassLoader.php'), false);
 
         $finder = new Finder();
@@ -131,24 +114,8 @@ class Compiler
             ->name('*.json')
             ->in(__DIR__ . '/../../res')
         ;
-
         foreach ($finder as $file) {
             $this->addFile($phar, $file, false);
-        }
-        $this->addFile($phar, new \SplFileInfo(__DIR__ . '/../../src/Composer/IO/hiddeninput.exe'), false);
-
-        $finder = new Finder();
-        $finder->files()
-            ->ignoreVCS(true)
-            ->name('*.php')
-            ->exclude('Tests')
-            ->in(__DIR__.'/../../vendor/symfony/')
-            ->in(__DIR__.'/../../vendor/seld/jsonlint/src/')
-            ->in(__DIR__.'/../../vendor/justinrainbow/json-schema/src/')
-        ;
-
-        foreach ($finder as $file) {
-            $this->addFile($phar, $file);
         }
 
         $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/autoload.php'));
@@ -190,7 +157,7 @@ class Compiler
         $phar->addFromString($path, $content);
     }
 
-    private function addComposerBin($phar)
+    public function addBin($phar)
     {
         $content = file_get_contents(__DIR__.'/../../bin/composer');
         $content = preg_replace('{^#!/usr/bin/env php\s*}', '', $content);
@@ -229,22 +196,5 @@ class Compiler
         }
 
         return $output;
-    }
-
-    private function getStub()
-    {
-        $stub = <<<'EOF'
-#!/usr/bin/env php
-<?php
-
-Phar::mapPhar('composer.phar');
-
-EOF;
-
-        return $stub . <<<'EOF'
-require 'phar://composer.phar/bin/composer';
-
-__HALT_COMPILER();
-EOF;
     }
 }
