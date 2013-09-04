@@ -7,6 +7,9 @@ use Symfony\Component\Process\Process;
 
 /**
  * The Compiler class compiles your library into a phar
+ * 
+ * This class is based on composer's phar compiler class
+ * @link https://github.com/composer/composer/blob/master/src/Composer/Compiler.php
  *
  * @author Chris Bednarski <banzaimonkey@gmail.com>
  * @author Fabien Potencier <fabien@symfony.com>
@@ -14,11 +17,14 @@ use Symfony\Component\Process\Process;
  */
 class Compiler
 {
-    protected $finders;
-    protected $version;
+    protected $finders = array();
+    protected $version = null;
+    protected $license = null;
 
-    protected $target = 'pharcc-target.phar';
-    protected $main = ''
+    /** The target name for your phar app */
+    protected $target = 'pharcc-target';
+    /** The main executable for your app, if you have one */
+    protected $main = null;
 
     protected $default_includes = array(
         'src',
@@ -32,6 +38,7 @@ class Compiler
         'tests',
         'Tests',
         'phpunit',
+        'doc',
     )
 
     protected $stub = <<<"HEREDOC"
@@ -45,15 +52,54 @@ require 'phar://$target/$main';
 __HALT_COMPILER();
 HEREDOC;
 
+    /**
+     * Returns a boolean indicating whether or not you're allowed to compile a
+     * phar, based on the phar.readonly ini setting
+     *
+     * @link http://php.net/manual/en/phar.configuration.php
+     *
+     * @return bool true if we can compile
+     */
+    public static function canCompile()
+    {
+        return Phar::canWrite();
+    }
+
     public function __construct()
     {
 
+    }
+
+    public function setMain($main)
+    {
+        $this->main = $main;
+
+        return $this;
+    }
+
+    public function getMain()
+    {
+        return $this->main;
+    }
+
+    public function setTarget($target)
+    {
+        $this->target = $target;
+
+        return $this;
+    }
+
+    public function getTarget()
+    {
+        return $this->target();
     }
 
     /** @link http://php.net/manual/en/phar.fileformat.stub.php */
     public function setStub($stub)
     {
         $this->stub = $stub;
+
+        return $this;
     }
 
     private function getStub()
@@ -64,6 +110,8 @@ HEREDOC;
     public function addFinder(Finder $finder)
     {
         $this->finders[] = $finder;
+
+        return $this;
     }
 
     public function getFinders()
@@ -73,7 +121,7 @@ HEREDOC;
 
     public function compile()
     {
-        if(!Phar::canWrite()) {
+        if(!self::canCompile()) {
             throw new \RuntimeException(
                 'Unable to compile a phar because of php\'s security settings.'
                 . 'phar.readonly must be disabled. Details here:'
@@ -107,17 +155,6 @@ HEREDOC;
             $this->addFile($phar, $file);
         }
 
-        $this->addFile($phar, new \SplFileInfo(__DIR__ . '/Autoload/ClassLoader.php'), false);
-
-        $finder = new Finder();
-        $finder->files()
-            ->name('*.json')
-            ->in(__DIR__ . '/../../res')
-        ;
-        foreach ($finder as $file) {
-            $this->addFile($phar, $file, false);
-        }
-
         $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/autoload.php'));
         $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/autoload_namespaces.php'));
         $this->addFile($phar, new \SplFileInfo(__DIR__.'/../../vendor/composer/autoload_classmap.php'));
@@ -147,7 +184,7 @@ HEREDOC;
 
         $content = file_get_contents($file);
         if ($strip) {
-            $content = $this->stripWhitespace($content);
+            $content = self::stripWhitespace($content);
         } elseif ('LICENSE' === basename($file)) {
             $content = "\n".$content."\n";
         }
@@ -170,7 +207,7 @@ HEREDOC;
      * @param  string $source A PHP string
      * @return string The PHP string with the whitespace removed
      */
-    private function stripWhitespace($source)
+    public static function stripWhitespace($source)
     {
         if (!function_exists('token_get_all')) {
             return $source;
