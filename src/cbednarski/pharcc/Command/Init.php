@@ -39,7 +39,7 @@ class Init extends Command
             file_put_contents($directory . DIRECTORY_SEPARATOR . 'pharcc.yml', $pharccyml);
             $output->writeln('<info>Initialized pharcc.yml under '.$directory.'</info>');
         } else {
-            $output->writeln('<error>Unable to write pharcc.yml to '.$directory.'</error>')
+            $output->writeln('<error>Unable to write pharcc.yml to '.$directory.'</error>');
         }
     }
 }
