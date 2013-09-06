@@ -1,10 +1,10 @@
 <?php
 
-class CompilerTest extends PHPUnitFramework_TestCase
+class CompilerTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testCompiler()
     {
-        $compiler->compile();
+        // $compiler->compile();
     }
 }
