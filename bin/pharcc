@@ -1,0 +1,9 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../vendor/autoload.php');
+
+$application = new Symfony\Component\Console\Application();
+$application->add(new cbednarski\Pharcc\Command\Build());
+$application->add(new cbednarski\Pharcc\Command\Init());
+$application->run();
