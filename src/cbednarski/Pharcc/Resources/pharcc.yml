@@ -2,6 +2,6 @@ include:
   - src/
   - vendor/
 exclude:
-  - *Test.php
+  - "*Test.php"
 main: bin/app
 name: app.phar

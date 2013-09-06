@@ -1,6 +1,6 @@
 <?php
 
-namespace cbednarski\pharcc;
+namespace cbednarski\Pharcc;
 
 class Git
 {
