@@ -50,7 +50,7 @@ class Config
 
     public function setName($name)
     {
-        if(substr($name, -5) !== '.phar') {
+        if (substr($name, -5) !== '.phar') {
             throw new \RuntimeException('Name must end in .phar');
         }
 
@@ -112,6 +112,6 @@ class Config
     public function getExcludes()
     {
         return $this->excludes;
-    }    
+    }
 
 }

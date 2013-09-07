@@ -9,7 +9,7 @@ use Symfony\Component\Finder\Finder;
 
 /**
  * The Compiler class compiles your library into a phar
- * 
+ *
  * This class is based on composer's phar compiler class
  * @link https://github.com/composer/composer/blob/master/src/Composer/Compiler.php
  *
@@ -177,12 +177,12 @@ HEREDOC;
          *  @link http://php.net/manual/en/phar.startbuffering.php */
         $this->phar->startBuffering();
 
-        foreach($this->default_excludes as $exclude) {
+        foreach ($this->default_excludes as $exclude) {
             $this->exclude("/$exclude/");
         }
 
         foreach ($this->getFinders() as $finder) {
-            foreach($finder as $file) {
+            foreach ($finder as $file) {
                 $this->addFile($file);
             }
         }
