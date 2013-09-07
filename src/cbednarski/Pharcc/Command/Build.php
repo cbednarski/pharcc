@@ -31,7 +31,7 @@ class Build extends Command
             $directory = getcwd();
         }
 
-        $config = Config::loadFile($directory . '/pharcc.yml');
+        $config = Config::loadFile($directory . '/.pharcc.yml');
         $compiler = new Compiler($config);
         $compiler->setOutput($output);
 
