@@ -30,6 +30,28 @@ class Config
         return new static(pathinfo($path, PATHINFO_DIRNAME), $data);
     }
 
+    public static function getConfigFor($appname)
+    {
+        $yaml = file_get_contents(__DIR__ . '/Resources/pharcc.yml');
+        // Try to anticipate the user's project-specific configuration
+        $yaml = str_replace('app.phar', $appname . '.phar', $yaml);
+        $yaml = str_replace('bin/app', 'bin/' . $appname, $yaml);
+
+        return $yaml;
+    }
+
+    public static function generate($directory)
+    {
+        if (is_writeable($directory)) {
+            $yaml = self::getConfigFor(basename($directory));
+            file_put_contents($directory . DIRECTORY_SEPARATOR . '.pharcc.yml', $yaml);
+
+            return true;
+        }
+
+        return false;
+    }
+
     public function __construct($base_path, $data = array())
     {
         $this->base_path = $base_path;

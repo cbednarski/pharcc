@@ -2,6 +2,7 @@
 
 namespace cbednarski\Pharcc\Command;
 
+use cbednarski\Pharcc\Config;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,10 +29,7 @@ class Init extends Command
             $directory = getcwd();
         }
 
-        $pharccyml = file_get_contents(__DIR__ . '/../Resources/pharcc.yml');
-
-        if (is_writeable($directory)) {
-            file_put_contents($directory . DIRECTORY_SEPARATOR . 'pharcc.yml', $pharccyml);
+        if (Config::generate($directory)) {
             $output->writeln('<info>Initialized pharcc.yml under '.$directory.'</info>');
         } else {
             $output->writeln('<error>Unable to write pharcc.yml to '.$directory.'</error>');
