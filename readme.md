@@ -2,6 +2,8 @@
 
 A phar compiler library for PHP, based on the phar compiler code in [composer](https://github.com/composer/composer).
 
+[![Build Status](https://travis-ci.org/cbednarski/pharcc.png?branch=master)](https://travis-ci.org/cbednarski/pharcc)
+
 ## Usage
 
 ### Composer
