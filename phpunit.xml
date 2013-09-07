@@ -9,7 +9,7 @@
       <directory suffix=".php">./vendor/</directory>
     </blacklist>
     <whitelist processUncoveredFilesFromWhitelist="true">
-      <directory suffix=".php">./src/cbednarski/pharcc/</directory>
+      <directory suffix=".php">./src/cbednarski/Pharcc/</directory>
     </whitelist>
   </filter>
   <logging>

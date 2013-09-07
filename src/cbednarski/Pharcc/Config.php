@@ -7,7 +7,7 @@ use Symfony\Component\Yaml\Yaml;
 class Config
 {
     protected $base_path;
-    protected $ignores;
+    protected $excludes;
     protected $includes;
     protected $main;
     protected $name;
@@ -35,7 +35,12 @@ class Config
         $this->base_path = $base_path;
         $this->data = $data;
 
-        var_dump($data);
+        if ($data) {
+            $this->setName($data['name']);
+            $this->setMain($data['main']);
+            $this->setIncludes($data['include']);
+            $this->setExcludes($data['exclude']);
+        }
     }
 
     public function getBasePath()
@@ -45,6 +50,10 @@ class Config
 
     public function setName($name)
     {
+        if(substr($name, -5) !== '.phar') {
+            throw new \RuntimeException('Name must end in .phar');
+        }
+
         $this->name = $name;
 
         return $this;
@@ -86,23 +95,23 @@ class Config
         return $this->includes;
     }
 
-    public function setIgnores($ignores)
+    public function setExcludes($excludes)
     {
-        $this->ignores = $ignores;
+        $this->excludes = $excludes;
 
         return $this;
     }
 
-    public function addIgnore($ignore)
+    public function addExclude($exclude)
     {
-        $this->ignore = $ignore;
+        $this->exclude = $exclude;
 
         return $this;
     }
 
-    public function getIgnores()
+    public function getExcludes()
     {
-        return $this->ignores;
+        return $this->excludes;
     }    
 
 }
