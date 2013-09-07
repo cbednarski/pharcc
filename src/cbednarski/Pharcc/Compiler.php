@@ -20,103 +20,41 @@ use Symfony\Component\Finder\Finder;
 class Compiler
 {
     protected $phar = null;
-    protected $base_dir = null;
+    protected $config = null;
     protected $finders = array();
     protected $version = null;
     protected $license = null;
-
-    /** The target name for your phar app */
-    protected $target = null;
-    /** The main executable for your app, if you have one */
-    protected $main = 'vendor/autoload.php';
-
-    protected $default_includes = array(
-        'src',
-        'lib',
-        'vendor',
-    );
-
-    protected $default_excludes = array(
-        'test',
-        'Test',
-        'tests',
-        'Tests',
-        'phpunit',
-        'doc',
-        'docs',
-        'pharcc',
-    );
-
     protected $stub = null;
 
-    /**
-     * Returns a boolean indicating whether or not you're allowed to compile a
-     * phar, based on the phar.readonly ini setting
-     *
-     * @link http://php.net/manual/en/phar.configuration.php
-     *
-     * @return bool true if we can compile
-     */
-    public static function canCompile()
-    {
-        if (!Phar::canWrite()) {
-            throw new PharException(
-                'Unable to compile a phar because of php\'s security settings. '
-                . 'phar.readonly must be disabled in php.ini. Details here: '
-                . 'http://php.net/manual/en/phar.configuration.php');
-        }
-    }
-
-    public function __construct($base_dir, $target = 'target.phar')
+    public function __construct(Config $config)
     {
         self::canCompile();
+
+        $this->config = $config;
 
         $this->base_dir = realpath($base_dir);
         if (!$this->base_dir) {
             throw new RuntimeException('The compiler target directory does not exist');
         }
 
-        $this->target = $target;
-        $this->addFinder(self::initializeFinder($this->base_dir));
+        $this->addFinder(self::initializeFinder($this->config->getBaseDir()));
 
-        $this->phar = new Phar($this->getTargetPath(), 0, $target);
-    }
-
-    public static function initializeFinder($base_dir = null)
-    {
-        $finder = new Finder();
-        $finder->files()
-            ->ignoreDotFiles(true)
-            ->ignoreVCS(true)
-            ->ignoreUnreadableDirs(true);
-
-        if ($base_dir !== null) {
-            $finder->in($base_dir);
-        }
-
-        return $finder;
-    }
-
-    public function setMain($main)
-    {
-        $this->main = $main;
-
-        return $this;
+        $this->phar = new Phar($this->getTargetPath(), 0, $this->config->getName());
     }
 
     public function getMain()
     {
-        return $this->main;
+        return $this->config->getMain();
     }
 
     public function getTarget()
     {
-        return $this->target();
+        return $this->config->getName();
     }
 
     public function getTargetPath()
     {
-        return $this->base_dir . DIRECTORY_SEPARATOR . $this->target;
+        return $this->base_dir . DIRECTORY_SEPARATOR . $this->config->getName();
     }
 
     /** @link http://php.net/manual/en/phar.fileformat.stub.php */
@@ -210,6 +148,46 @@ HEREDOC;
     public function exclude($pattern)
     {
         $this->finders[0]->notPath($pattern);
+    }
+
+    public static function initializeFinder($base_dir = null)
+    {
+        $finder = new Finder();
+        $finder->files()
+            ->ignoreDotFiles(true)
+            ->ignoreVCS(true)
+            ->ignoreUnreadableDirs(true);
+
+        if ($base_dir !== null) {
+            $finder->in($base_dir);
+        }
+
+        return $finder;
+    }
+
+    /**
+     * Returns a boolean indicating whether or not you're allowed to compile a
+     * phar, based on the phar.readonly ini setting
+     *
+     * @link http://php.net/manual/en/phar.configuration.php
+     *
+     * @return bool true if we can compile
+     */
+    public static function canCompile()
+    {
+        if (!Phar::canWrite()) {
+            throw new PharException(
+                'Unable to compile a phar because of php\'s security settings. '
+                . 'phar.readonly must be disabled in php.ini. Details here: '
+                . 'http://php.net/manual/en/phar.configuration.php');
+        }
+    }
+
+    public static function stripShebang($source)
+    {
+        $stripped = preg_replace('@#!/.+\n@', '', $source);
+
+        return $stripped ? $stripped : $source;
     }
 
     /**
