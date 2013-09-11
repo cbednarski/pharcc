@@ -47,7 +47,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $includes = array('src/', 'vendor/');
         $this->assertEquals($includes, $config->getIncludes());
 
-        $excludes = array('*Test.php');
+        $excludes = array('/[Tt]ests?/', 'Test\.php$', '/docs?/', '^vendor/phpunit');
         $this->assertEquals($excludes, $config->getExcludes());
     }
 }
