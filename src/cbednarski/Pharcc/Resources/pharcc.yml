@@ -4,4 +4,7 @@ include:
   - src/
   - vendor/
 exclude:
-  - "*Test.php"
+  - "/[Tt]ests?/"
+  - "Test\.php$"
+  - "/docs?/"
+  - "^vendor/phpunit"
