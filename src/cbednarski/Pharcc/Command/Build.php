@@ -33,10 +33,10 @@ class Build extends Command
 
         $config = Config::loadFile($directory . '/.pharcc.yml');
         $compiler = new Compiler($config);
-        $compiler->setOutput($output);
+        // $compiler->setOutput($output);
 
-        $output->writeln('<info>Building ' . $config->getTarget() . '</info>');
-        $compiler->build();
+        $output->writeln('<info>Building ' . $config->getName() . '</info>');
+        $compiler->compile();
         $output->writeln('<info>Build complete.</info>');
     }
 }

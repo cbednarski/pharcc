@@ -6,6 +6,7 @@ use Phar;
 use PharException;
 use RuntimeException;
 use Symfony\Component\Finder\Finder;
+use cbednarski\FileUtils\FileUtils;
 
 /**
  * The Compiler class compiles your library into a phar
@@ -32,12 +33,11 @@ class Compiler
 
         $this->config = $config;
 
-        $this->base_dir = realpath($base_dir);
-        if (!$this->base_dir) {
+        if (!realpath($this->config->getBasePath())) {
             throw new RuntimeException('The compiler target directory does not exist');
         }
 
-        $this->addFinder(self::initializeFinder($this->config->getBaseDir()));
+        $this->addFinder(self::initializeFinder($this->config->getBasePath()));
 
         $this->phar = new Phar($this->getTargetPath(), 0, $this->config->getName());
     }
@@ -54,7 +54,7 @@ class Compiler
 
     public function getTargetPath()
     {
-        return $this->base_dir . DIRECTORY_SEPARATOR . $this->config->getName();
+        return $this->config->getBasePath() . DIRECTORY_SEPARATOR . $this->config->getName();
     }
 
     /** @link http://php.net/manual/en/phar.fileformat.stub.php */
@@ -72,14 +72,14 @@ class Compiler
 #!/usr/bin/env php
 <?php
 
-Phar::mapPhar('%target%');
+Phar::mapPhar('%name%');
 
-require 'phar://%target%/%main%';
+require 'phar://%name%/%main%';
 
 __HALT_COMPILER();\n
 HEREDOC;
-            $stub = str_replace('%target%', $this->target, $stub);
-            $stub = str_replace('%main%', $this->main, $stub);
+            $stub = str_replace('%name%', $this->config->getName(), $stub);
+            $stub = str_replace('%main%', $this->config->getMain(), $stub);
         } else {
             $stub = $this->stub;
         }
@@ -99,45 +99,94 @@ HEREDOC;
         return $this->finders;
     }
 
+    public function fetchFiles()
+    {
+        $files = array();
+        $paths = array();
+
+        // Add included directories and files to search path
+        foreach ($this->config->getIncludes() as $include) {
+            if (is_file($include)) {
+                $files[] = $include;
+            } elseif (is_dir($include)) {
+                $files = array_merge($files, FileUtils::listFilesInDir($this->config->getBasePath().DIRECTORY_SEPARATOR.$include));
+            } else {
+                throw new Exception('Included path is missing, unreadable, or is not a file or directory' . $include);
+            }
+        }
+
+        foreach ($files as $file) {
+            if (!$this->isExcluded($file)) {
+                $relative_path = (FileUtils::pathDiff($this->config->getBasePath(), $file, true));
+                $paths[$relative_path] = $file;
+            }
+        }
+
+        unset($files);
+        asort($paths);
+
+        return $paths;
+    }
+
+    public function isExcluded($path)
+    {
+        foreach ($this->config->getExcludes() as $exclude) {
+            if (preg_match("@$exclude@", $path) && !preg_match("@.+SimpleTest\.php@", $path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function compile()
     {
+
         if (file_exists($this->getTargetPath())) {
-            unlink($this->getTargetPath());
+            if (is_writable($this->getTargetPath())) {
+                unlink($this->getTargetPath());
+            } else {
+                throw new Exception('Unable to overwrite target file.');
+            }
         }
 
         //@TODO add version stuff here
 
-        $this->phar->setSignatureAlgorithm(Phar::SHA1);
-
-        /** Optional, but improves performance for this type of operation.
-         *  For an example library, the compile time goes from 154s to 40s
-         *  when buffering is used.
-         *  @link http://php.net/manual/en/phar.startbuffering.php */
+        // Optional, but improves performance for this type of operation.
+        // For an example library, the compile time goes from 154s to 40s
+        // when buffering is used.
+        // @link http://php.net/manual/en/phar.startbuffering.php
         $this->phar->startBuffering();
-
-        foreach ($this->default_excludes as $exclude) {
-            $this->exclude("/$exclude/");
-        }
-
-        foreach ($this->getFinders() as $finder) {
-            foreach ($finder as $file) {
-                $this->addFile($file);
-            }
-        }
-
         $this->phar->setStub($this->getStub());
+
+        $this->phar->buildFromIterator(new \ArrayIterator($this->fetchFiles()));
+        $this->addMain($this->config->getBasePath() . DIRECTORY_SEPARATOR . $this->config->getMain());
+
+        $this->phar->setSignatureAlgorithm(Phar::SHA1);
         $this->phar->stopBuffering();
 
         unset($this->phar);
+
+        if (is_writable($this->getTargetPath())) {
+            chmod($this->getTargetPath(), 0755);
+        }
     }
 
     public function addFile($file)
     {
         $content = file_get_contents($file->getPathName());
-        $content = self::stripWhitespace($content);
+        $content = self::stripWhitespace(self::stripShebang($content));
         $content = str_replace('@package_version@', $this->version, $content);
 
         $this->phar->addFromString($file->getRelativePathname(), $content);
+    }
+
+    public function addMain($file)
+    {
+        $content = file_get_contents($file);
+        $content = self::stripWhitespace(self::stripShebang($content));
+
+        $this->phar->addFromString(FileUtils::pathDiff($this->config->getBasePath(), $file, true), $content);
     }
 
     public function addDirectory($path)
@@ -171,7 +220,8 @@ HEREDOC;
      *
      * @link http://php.net/manual/en/phar.configuration.php
      *
-     * @return bool true if we can compile
+     * @throws \PharException
+     * @return bool           true if we can compile
      */
     public static function canCompile()
     {
