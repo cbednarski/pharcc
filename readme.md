@@ -14,7 +14,7 @@ The easiest way to get it working is to download a tagged [`pharcc.phar`](https:
     $ chmod +x pharcc.phar
     $ sudo mv pharcc.phar /usr/local/bin/pharcc
 
-You can also install using composer.
+You can also install using composer if you want to embed it in your project, or clone the repo and run it from source.
 
 ### Usage
 
