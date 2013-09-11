@@ -8,7 +8,13 @@ pharcc is a command-line tool that converts your php project into a single, exec
 
 pharcc requires php 5.3+. You must also set `phar.readonly = Off` in your `php.ini` or you will be unable to compile `.phar` files.
 
-The easiest way to get it working is to download a tagged `.phar` release, and put this on your path. You can also download a [release](https://github.com/cbednarski/pharcc/releases) or install using composer.
+The easiest way to get it working is to download a tagged [`pharcc.phar`](https://github.com/cbednarski/pharcc/releases) release, and put this on your path. For example:
+
+    $ wget https://github.com/cbednarski/pharcc/releases/download/v0.2.1/pharcc.phar
+    $ chmod +x pharcc.phar
+    $ sudo mv pharcc.phar /usr/local/bin/pharcc
+
+You can also install using composer.
 
 ### Usage
 
@@ -63,7 +69,7 @@ If your application doesn't look like this pharcc will probably still work, but 
 
 Contributions are welcome! Here are some guidelines to follow:
 
-- The spirit of this project is to be simple and solve the general use case of creating phar files. It currently supports console applications and I'm willing to accept pull requests to add the ability to make a web app phar, like the one for phpMyAdmin. Other large features, maybe. Get in touch.
+- The spirit of this project is to be simple and solve the general use case of creating phar files. It currently supports console applications and I'm willing to accept pull requests to add the ability to make a web app phar, like the one for phpMyAdmin, and a self-update command. Other large features, maybe. Get in touch.
 - If you file a bug please include steps to repro, or even better, link me to a git hash that's failing to compile properly (make sure it includes your `.pharcc.yml` file).
 - Code follows PSR-2 formatting rules. Use [php-cs-fixer](https://github.com/fabpot/PHP-CS-Fixer) to reformat your code before you PR.
 - Use phpunit to run the unit tests and make sure they pass.
