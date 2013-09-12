@@ -2,7 +2,7 @@
 
 pharcc is a command-line tool that converts your php project into a single, executable `.phar` file for easy distribution.
 
-[![Build Status](https://travis-ci.org/cbednarski/pharcc.png?branch=master)](https://travis-ci.org/cbednarski/pharcc)
+[![Build Status](https://travis-ci.org/cbednarski/pharcc.png?branch=master)](https://travis-ci.org/cbednarski/pharcc) [![Roadmap Items](https://badge.waffle.io/cbednarski/pharcc.png?label=ready)](https://waffle.io/cbednarski/pharcc)
 
 ### Installation
 
@@ -67,7 +67,7 @@ If your application doesn't look like this pharcc will probably still work, but 
 
 ### Contributing
 
-Contributions are welcome! Here are some guidelines to follow:
+Contributions are welcome! Check out the list of ready-for-dev items here: [![Roadmap Items](https://badge.waffle.io/cbednarski/pharcc.png?label=ready)](https://waffle.io/cbednarski/pharcc) Here are some guidelines to follow:
 
 - The spirit of this project is to be simple and solve the general use case of creating phar files. It currently supports console applications and I'm willing to accept pull requests to add the ability to make a web app phar, like the one for phpMyAdmin, and a self-update command. Other large features, maybe. Get in touch.
 - If you file a bug please include steps to repro, or even better, link me to a git hash that's failing to compile properly (make sure it includes your `.pharcc.yml` file).
