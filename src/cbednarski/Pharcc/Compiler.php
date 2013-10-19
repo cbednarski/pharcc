@@ -188,7 +188,7 @@ HEREDOC;
         $content = self::stripWhitespace(self::stripShebang($content));
 
         $content = preg_replace(
-            "/(.+new.+Application\\('\\w+',).+?(\\);.+)/s",
+            "/(.+new[\w \\\\]+Application\\('\\w+',).+?(\\);.+)/s",
             '$1\'' . Git::getVersion($this->config->getBasePath()) . '\'$2',
             $content
         );
