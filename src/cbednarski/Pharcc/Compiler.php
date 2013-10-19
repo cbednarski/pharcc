@@ -7,6 +7,7 @@ use PharException;
 use RuntimeException;
 use Symfony\Component\Finder\Finder;
 use cbednarski\FileUtils\FileUtils;
+use cbednarski\Pharcc\Git;
 
 /**
  * The Compiler class compiles your library into a phar
@@ -185,6 +186,12 @@ HEREDOC;
     {
         $content = file_get_contents($file);
         $content = self::stripWhitespace(self::stripShebang($content));
+
+        $content = preg_replace(
+            "/(.+new.+Application\\('\\w+',).+?(\\);.+)/s",
+            '$1\'' . Git::getVersion($this->config->getBasePath()) . '\'$2',
+            $content
+        );
 
         $this->phar->addFromString(FileUtils::pathDiff($this->config->getBasePath(), $file, true), $content);
     }

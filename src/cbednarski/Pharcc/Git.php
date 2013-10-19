@@ -46,7 +46,7 @@ class Git
             return 'unknown';
         }
 
-        if (1 === preg_match('/^(\d+\.\d+.\d+)(?:\-(\d+)\-[\w\d]+)?$/', $raw_version, $matches)) {
+        if (1 === preg_match('/^v?(\d+\.\d+.\d+)(?:\-(\d+)\-[\w\d]+)?$/', $raw_version, $matches)) {
             if (isset($matches[2])) {
                 if ($strict) {
                     return 'unknown';
