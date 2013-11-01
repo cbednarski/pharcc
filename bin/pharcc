@@ -1,7 +1,13 @@
 #!/usr/bin/env php
 <?php
 
-include(__DIR__ . '/../vendor/autoload.php');
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once(__DIR__ . '/../vendor/autoload.php');
+} elseif (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
+    require_once(__DIR__ . '/../../../../vendor/autoload.php');
+} else {
+    throw new \Exception('Unable to load autoloader');
+}
 
 $application = new Symfony\Component\Console\Application();
 $application->add(new cbednarski\Pharcc\Command\Build());
