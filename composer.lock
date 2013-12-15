@@ -3,20 +3,20 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "6a4dc15ce47072bf4a794c342d761cc5",
+    "hash": "b3418700c8a6716caa9bcc743a95b2bd",
     "packages": [
         {
             "name": "cbednarski/fileutils",
-            "version": "dev-master",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cbednarski/FileUtils.git",
-                "reference": "78d6c3a90b5d5655cbea70060d53743c570d0e04"
+                "reference": "12081e7886a4b41dd6fa54686da00bf1fc0c1c4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cbednarski/FileUtils/zipball/78d6c3a90b5d5655cbea70060d53743c570d0e04",
-                "reference": "78d6c3a90b5d5655cbea70060d53743c570d0e04",
+                "url": "https://api.github.com/repos/cbednarski/FileUtils/zipball/12081e7886a4b41dd6fa54686da00bf1fc0c1c4c",
+                "reference": "12081e7886a4b41dd6fa54686da00bf1fc0c1c4c",
                 "shasum": ""
             },
             "type": "library",
@@ -36,7 +36,7 @@
                 }
             ],
             "description": "PHP Library for doing path-based filename manipulation and other similar fun activities",
-            "time": "2013-09-06 06:55:17"
+            "time": "2013-11-01 01:28:21"
         },
         {
             "name": "symfony/console",
@@ -193,9 +193,9 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "cbednarski/fileutils": 20
-    },
+    "stability-flags": [
+
+    ],
     "platform": [
 
     ],
