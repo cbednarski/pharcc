@@ -110,9 +110,13 @@ HEREDOC;
             if (is_file($include)) {
                 $files[] = $include;
             } elseif (is_dir($include)) {
-                $files = array_merge($files, FileUtils::listFilesInDir($this->config->getBasePath() . DIRECTORY_SEPARATOR . $include));
+                $files = array_merge($files, FileUtils::listFilesInDir(
+                    $this->config->getBasePath() . DIRECTORY_SEPARATOR . $include));
             } else {
-                throw new \Exception('Included path is missing, unreadable, or is not a file or directory' . $include);
+                throw new \Exception('You\'ve asked pharcc to include a path that is missing,'
+                    . ' unreadable, or is not a file or directory: ' . PHP_EOL . PHP_EOL
+                    . '   ' . $include . PHP_EOL . PHP_EOL
+                    . 'Check your pharcc.yml or filesystem permissions to fix this.');
             }
         }
 
