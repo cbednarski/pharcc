@@ -61,7 +61,12 @@ class Config
             $this->setName($data['name']);
             $this->setMain($data['main']);
             $this->setIncludes($data['include']);
-            $this->setExcludes($data['exclude']);
+            if (isset($data['exclude'])) {
+                $this->setExcludes($data['exclude']);
+            } else {
+                $this->setExcludes(array());
+            }
+
         }
     }
 

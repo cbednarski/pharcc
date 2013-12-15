@@ -1,4 +1,4 @@
-all: init test
+all: init test phar
 init:
 	composer install
 test:
