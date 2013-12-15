@@ -9,7 +9,9 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     throw new \Exception('Unable to load autoloader');
 }
 
-$application = new Symfony\Component\Console\Application();
+use cbednarski\Pharcc\Git;
+
+$application = new Symfony\Component\Console\Application('pharcc', Git::getVersion(__DIR__));
 $application->add(new cbednarski\Pharcc\Command\Build());
 $application->add(new cbednarski\Pharcc\Command\Init());
 $application->run();

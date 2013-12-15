@@ -10,7 +10,7 @@ pharcc requires php 5.3+. You must also set `phar.readonly = Off` in your `php.i
 
 The easiest way to get it working is to download a tagged [`pharcc.phar`](https://github.com/cbednarski/pharcc/releases) release, and put this on your path. For example:
 
-    $ wget https://github.com/cbednarski/pharcc/releases/download/v0.2.1/pharcc.phar
+    $ wget https://github.com/cbednarski/pharcc/releases/download/v0.2.3/pharcc.phar
     $ chmod +x pharcc.phar
     $ sudo mv pharcc.phar /usr/local/bin/pharcc
 
@@ -63,11 +63,30 @@ I assume your project layout looks something like this, which is pretty standard
             ├── finder
             └── yaml
 
-If your application doesn't look like this pharcc will probably still work, but you'll need to tweak your `.pharcc.yml` with some other appropriate includes / excludes. If you have problems file a bug or send over a pull-request and I'll take a look.
+If your application doesn't look like this pharcc will probably still work, but you'll need to tweak your `.pharcc.yml` with some other appropriate includes / excludes.
+
+### Version Reporting
+
+If your project is in git, uses semver tags for releases, and uses the symfony console component, pharcc can report the version of your application on the commandline. For example:
+
+    $ pharcc --version
+    pharcc version 0.2.3
+
+To make this work in your app, you'll need to add `cbednarski\Pharcc\Git::getVersion(__DIR__)` to your bin file.
+
+```php
+use cbednarski\Pharcc\Git;
+
+$application = new Symfony\Component\Console\Application('pharcc', Git::getVersion(__DIR__));
+```
+
+Note: The current implementation is pretty magic, and only works if you worship the git, semver, and symfony console component gods.
 
 ### Contributing
 
-Contributions are welcome! Check out the list of ready-for-dev items here: [![Roadmap Items](https://badge.waffle.io/cbednarski/pharcc.png?label=ready)](https://waffle.io/cbednarski/pharcc) Here are some guidelines to follow:
+Contributions are welcome! Please don't hesitate to file a bug, pull-request a feature, or let me know what could be made easier to use.
+
+Check out the list of ready-for-dev items here: [![Roadmap Items](https://badge.waffle.io/cbednarski/pharcc.png?label=ready)](https://waffle.io/cbednarski/pharcc) Here are some guidelines to follow:
 
 - The spirit of this project is to be simple and solve the general use case of creating phar files. It currently supports console applications and I'm willing to accept pull requests to add the ability to make a web app phar, like the one for phpMyAdmin, and a self-update command. Other large features, maybe. Get in touch.
 - If you file a bug please include steps to repro, or even better, link me to a git hash that's failing to compile properly (make sure it includes your `.pharcc.yml` file).
