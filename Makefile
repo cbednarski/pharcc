@@ -7,3 +7,4 @@ phar:
 	./bin/pharcc build
 clean:
 	rm -rf vendor/
+	rm pharcc.phar
