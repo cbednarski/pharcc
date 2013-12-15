@@ -235,8 +235,10 @@ HEREDOC;
         if (!Phar::canWrite()) {
             throw new PharException(
                 'Unable to compile a phar because of php\'s security settings. '
-                . 'phar.readonly must be disabled in php.ini. Details here: '
-                . 'http://php.net/manual/en/phar.configuration.php');
+                . 'phar.readonly must be disabled in php.ini. ' . PHP_EOL . PHP_EOL
+                . 'You will need to edit ' . php_ini_loaded_file() . ' and add or set'
+                . PHP_EOL . PHP_EOL . "    phar.readonly = Off" . PHP_EOL . PHP_EOL
+                . 'to continue. Details here: http://php.net/manual/en/phar.configuration.php');
         }
     }
 
