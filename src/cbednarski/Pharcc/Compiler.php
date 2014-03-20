@@ -151,7 +151,7 @@ HEREDOC;
             if (is_writable($this->getTargetPath())) {
                 unlink($this->getTargetPath());
             } else {
-                throw new Exception('Unable to overwrite target file.');
+                throw new \Exception('Unable to overwrite target file.');
             }
         }
 
