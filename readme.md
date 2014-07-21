@@ -16,27 +16,19 @@ The easiest way to get it working is to download a tagged [`pharcc.phar`](https:
     $ chmod +x pharcc.phar
     $ sudo mv pharcc.phar /usr/local/bin/pharcc
 
-#### Via composer global
+#### Other ways
 
-If you have composer installed, you can use composer's global install option instead (and this makes it easier to keep pharcc up-to-date):
+Composer (thanks [@clue](https://github.com/clue)):
 
     $ composer global require cbednarski/pharcc=dev-master
-
-Add `~/.composer/vendor/bin/` to your path and you're good to go. Maybe something like this, depending on your setup:
-
     $ echo 'export PATH=$PATH:$HOME/.composer/vendor/bin' >> ~/.bash_profile
 
-Thanks [@clue](https://github.com/clue)
-
-#### From Source
+From source:
 
     $ git clone https://github.com/cbednarski/pharcc
     $ cd pharcc
-    $ make install
-    -- or --
-    $ make install-dev
-
-`install` will build a phar and put it in `/usr/local/bin`, while `install-dev` will point a symlink at the pharcc binstub so you can hack on the code.
+    $ make install      # For using
+    $ make install-dev  # For hacking
 
 ### Usage
 
