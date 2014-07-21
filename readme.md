@@ -36,7 +36,7 @@ Thanks [@clue](https://github.com/clue)
     -- or --
     $ make install-dev
 
-`install` will build a phar and put it in `/usr/local/bin`, while `install-dev` will point a symlink at the pharcc binstub so you can hack on the code and play with it.
+`install` will build a phar and put it in `/usr/local/bin`, while `install-dev` will point a symlink at the pharcc binstub so you can hack on the code.
 
 ### Usage
 
