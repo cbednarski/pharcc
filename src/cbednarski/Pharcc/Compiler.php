@@ -226,13 +226,7 @@ HEREDOC;
     }
 
     /**
-     * Returns a boolean indicating whether or not you're allowed to compile a
-     * phar, based on the phar.readonly ini setting
-     *
-     * @link http://php.net/manual/en/phar.configuration.php
-     *
-     * @throws \PharException
-     * @return bool           true if we can compile
+     * Guard clause for wrong ini settings
      */
     public static function canCompile()
     {
