@@ -8,13 +8,35 @@ pharcc is a command-line tool that converts your php project into a single, exec
 
 pharcc requires php 5.3+. You must also set `phar.readonly = Off` in your `php.ini` or you will be unable to compile `.phar` files.
 
+#### Via `.phar`
+
 The easiest way to get it working is to download a tagged [`pharcc.phar`](https://github.com/cbednarski/pharcc/releases) release, and put this on your path. For example:
 
     $ wget https://github.com/cbednarski/pharcc/releases/download/v0.2.3/pharcc.phar
     $ chmod +x pharcc.phar
     $ sudo mv pharcc.phar /usr/local/bin/pharcc
 
-You can also install using composer if you want to embed it in your project, or clone the repo and run it from source.
+#### Via composer global
+
+If you have composer installed, you can use composer's global install option instead (and this makes it easier to keep pharcc up-to-date):
+
+    $ composer global require cbednarski/pharcc=dev-master
+
+Add `~/.composer/vendor/bin/` to your path and you're good to go. Maybe something like this, depending on your setup:
+
+    $ echo 'export PATH=$PATH:$HOME/.composer/vendor/bin' >> ~/.bash_profile
+
+Thanks [@clue](https://github.com/clue)
+
+#### From Source
+
+    $ git clone https://github.com/cbednarski/pharcc
+    $ cd pharcc
+    $ make install
+    -- or --
+    $ make install-dev
+
+`install` will build a phar and put it in `/usr/local/bin`, while `install-dev` will point a symlink at the pharcc binstub so you can hack on the code and play with it.
 
 ### Usage
 
