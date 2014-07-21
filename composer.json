@@ -16,5 +16,8 @@
     },
     "autoload": {
         "psr-0": {"cbednarski": "src/"}
-    }
+    },
+    "bin": [
+        "bin/pharcc"
+    ]
 }
