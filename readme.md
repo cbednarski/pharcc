@@ -49,7 +49,7 @@ You can also use pharcc as a library and call the internals directly, but if you
 
 ### How it works
 
-A phar is essentially a slew of php files that are concatenated together to create a single, executable php file, complete with assets and such. pharcc reads a `.pharcc.yml` file from the root of your project and, combined with some assumed conventions, builds an executable phar for you.
+A phar is essentially a slew of php files that are concatenated together to create a single, executable php file, complete with assets and such. pharcc reads a [`.pharcc.yml`](https://github.com/cbednarski/pharcc/blob/master/src/cbednarski/Pharcc/Resources/pharcc.yml) file from the root of your project and, combined with some assumed conventions, builds an executable phar for you.
 
 I assume the following:
 
