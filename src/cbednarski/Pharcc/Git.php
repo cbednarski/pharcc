@@ -22,43 +22,49 @@ class Git
      */
     public static function getVersion($path, $strict = false)
     {
+        $version = 'unknown';
+
         $temp_path = getcwd();
+
         // Git needs the cwd to be inside the repo
         // proc_open will pick this up automatically
         chdir($path);
 
-        $descriptorspec = array(
-            0 => array('pipe', 'r'), // stdin
-            1 => array('pipe', 'w'), // stdout
-            2 => array('pipe', 'w'), // stderr
-        );
+        // multi-level exit loop
+        do {
+            $descriptorspec = array(
+                0 => array('pipe', 'r'), // stdin
+                1 => array('pipe', 'w'), // stdout
+                2 => array('pipe', 'w'), // stderr
+            );
 
-        $process = proc_open('git describe', $descriptorspec, $pipes);
-        $return_value = null;
+            $process = proc_open('git describe', $descriptorspec, $pipes);
+            $return_value = null;
 
-        if (is_resource($process)) {
-            $raw_version = stream_get_contents($pipes[1]);
-            $errors = stream_get_contents($pipes[2]);
-            $return_value = proc_close($process);
-        }
+            if (is_resource($process)) {
+                $raw_version = stream_get_contents($pipes[1]);
+                $errors = stream_get_contents($pipes[2]);
+                $return_value = proc_close($process);
+            }
 
-        if ($return_value !== 0) {
-            return 'unknown';
-        }
+            if ($return_value !== 0) {
+                break;
+            }
 
-        if (1 === preg_match('/^v?(\d+\.\d+.\d+)(?:\-(\d+)\-[\w\d]+)?$/', $raw_version, $matches)) {
-            if (isset($matches[2])) {
-                if ($strict) {
-                    return 'unknown';
+            if (1 === preg_match('/^v?(\d+\.\d+.\d+)(?:\-(\d+)\-[\w\d]+)?$/', $raw_version, $matches)) {
+                if (isset($matches[2])) {
+                    if ($strict) {
+                        break;
+                    } else {
+                        $version = $matches[1] . '+' . $matches[2];
+                    }
                 } else {
-                    $version = $matches[1] . '+' . $matches[2];
+                    $version = $matches[1];
                 }
             } else {
-                $version = $matches[1];
+                break;
             }
-        } else {
-            return 'unknown';
-        }
+        } while(false);
 
         // Reset the working directory
         chdir($temp_path);
